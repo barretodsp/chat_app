@@ -6,6 +6,7 @@ import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import PatientRegisterValidator from '../../validators/PatientRegisterValidator';
 import AutoMessages from '../../components/AutoMessages';
 import ChatHeader from '../../components/Headers/ChatHeader';
+import { Session } from '../../session/Session';
 
 const ENDPOINT = "http://192.168.80.3:3000";
 
@@ -26,6 +27,7 @@ function PatientChatScreen() {
   const [msgType, setMsgType] = useState(900);
   const [CID, setCID] = useState(null);
   const [medSocketId, setMedSocket] = useState(null);
+  const [medId, setMed] = useState(null);
 
 
   useEffect(() => {
@@ -40,6 +42,7 @@ function PatientChatScreen() {
       socket.on('consultation_started', function (received) {
         setMessage(GiftedChat.append(messages, received.message));
         setCID(received.consultation_id);
+        setMed(received.medical_id);
         setMedSocket(received.medical_socket);
         setChatTitle(received.medical_name)
       });
@@ -57,8 +60,10 @@ function PatientChatScreen() {
 
   useEffect(() => {
     if (socket) {
-      socket.on('waiting_queue', function (message) {
-        setMessage(GiftedChat.append(messages, message));
+      socket.on('waiting_queue', function (receive) {
+        console.log('RECEIVE waitin queue', receive)
+        setMessage(GiftedChat.append(messages, receive.message));
+        Session.setCurrentUser(receive.patient);
         setChatTitle('Aguardando Atendimento.')
         setMsgType(null);
       });
@@ -85,8 +90,8 @@ function PatientChatScreen() {
 
   useEffect(() => {
     if (socket) {
-      socket.on('receive_private_message', function (message) {
-        console.log('receive private msg', message);
+      socket.on('receive_consultation_message', function (message) {
+        console.log('receive_consultation_message', message);
         setMessage(GiftedChat.append(messages, message));
       });
     }
@@ -164,7 +169,7 @@ function PatientChatScreen() {
           return handleCep(message)
         default:
           setMessage(GiftedChat.append(messages, message));
-          socket.emit('send_private_message', message);
+           socket.emit('send_consultation_message', medSocketId, medId, CID, message);
       }
     } catch (er) {
       console.log('ERRO SEND MSG', er)
@@ -191,7 +196,7 @@ function PatientChatScreen() {
       <GiftedChat
         messages={messages}
         onSend={newMessage => handleSendMessage(newMessage)}
-        user={{ _id: 20, name: 'User Test' }}
+        user={{ _id: Session.CurrentUser.patient_id, name: Session.CurrentUser.name }}
       />
     </Container>
 

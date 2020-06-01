@@ -20,10 +20,10 @@ function MedicalLogoutScreen(props) {
   const [patName, setPatName] = useState(null);
 
   useEffect(() => {
-    console.log('MEDICAL CHAT - PROPS', props.navigation.state.patient);
+    console.log('MEDICAL CHAT - PROPS', props.navigation.state.params);
     console.log('MEDICAL CHAT -  SESSION', Session.CurrentUser);
-    if (props && props.navigation.state.patient) {
-      let wpatient = props.navigation.state.patient;
+    if (props && props.navigation.state.params.patient) {
+      let wpatient = props.navigation.state.params.patient;
       let socket = SocketIOClient(ENDPOINT);
       initSocket(socket);
       console.log('Emitido EVENTO')
@@ -36,8 +36,9 @@ function MedicalLogoutScreen(props) {
       socket.on('consultation_started', function (received) {
         setMessage(GiftedChat.append(messages, received.message));
         setCID(received.consultation_id);
+        setPatId(received.patient_id);
         setPatSocket(received.patient_socket);
-        setChatTitle(received.patient_name)
+        setChatTitle(received.patient_name);
       });
     }
   });
@@ -53,8 +54,8 @@ function MedicalLogoutScreen(props) {
 
   useEffect(() => {
     if (socket) {
-      socket.on('receive_private_message', function (message) {
-        console.log('receive private msg', message);
+      socket.on('receive_consultation_message', function (message) {
+        console.log('receive_consultation_message', message);
         setMessage(GiftedChat.append(messages, message));
       });
     }
@@ -62,7 +63,7 @@ function MedicalLogoutScreen(props) {
 
   const handleSendMessage = async (message) => {
     try {
-      socket.emit('send_private_message', message);
+      socket.emit('send_consultation_message', patSocketId, patId, CID, message);
     } catch (er) {
       console.log('ERRO SEND MSG', er)
     }
@@ -74,7 +75,7 @@ function MedicalLogoutScreen(props) {
       <GiftedChat
         messages={messages}
         onSend={newMessage => handleSendMessage(newMessage)}
-        user={{ _id: 20, name: 'User Test' }}
+        user={{ _id: Session.CurrentUser.medical_id, name: Session.CurrentUser.name }}
       />
     </Container>
   )
