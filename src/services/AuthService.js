@@ -8,6 +8,7 @@ const medicalLogin = (email, password) => {
             resp = await RestService.call('auth', 'loginMedical', { email, password })
             if (resp.status === 200) {
                 Session.setAuthToken(resp.token); 
+                Session.setCurrentUser(resp.medical);
                 console.log('RESP EM AUTH TOKEN', resp.token);
             }
             resolve(resp);

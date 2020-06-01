@@ -1,12 +1,12 @@
 export class Session {
-    static CurrentUserId = '';
+    static CurrentUser = '';
     static AuthToken = '';
     
     static setAuthToken(token){
         this.AuthToken = token || '';
     }
 
-    static changeCurrentUser(user){
+    static setCurrentUser(user){
         this.CurrentUser = user;
     }
   }

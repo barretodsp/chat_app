@@ -24,6 +24,8 @@ function PatientChatScreen() {
   const [cep, setCEP] = useState('');
   const [specialism, setSpecialism] = useState('');
   const [msgType, setMsgType] = useState(900);
+  const [CID, setCID] = useState(null);
+  const [medSocketId, setMedSocket] = useState(null);
 
 
   useEffect(() => {
@@ -32,6 +34,17 @@ function PatientChatScreen() {
     console.log('Emitido EVENTO')
     socket.emit('hello_patient', 'RN TEST');
   }, []);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('consultation_started', function (received) {
+        setMessage(GiftedChat.append(messages, received.message));
+        setCID(received.consultation_id);
+        setMedSocket(received.medical_socket);
+        setChatTitle(received.medical_name)
+      });
+    }
+  });
 
   useEffect(() => {
     if (socket) {
