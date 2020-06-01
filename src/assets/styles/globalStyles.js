@@ -2,6 +2,48 @@ import { StyleSheet } from 'react-native';
 
 const global = StyleSheet.create({
 
+    inputTextLabel: {
+        color: '#808080',
+        fontSize: 13,
+        paddingLeft: 5,
+        paddingBottom: 5,
+        fontFamily: 'Roboto'
+    },
+
+    blueBtnLabel: {
+        color: '#FFF',
+        fontSize: 20,
+    },
+    
+    form: {
+        paddingHorizontal: 5,
+        marginBottom: 20,
+        paddingTop: 15,
+    },
+
+    formTextInput: {
+        fontSize: 16,
+    },
+
+    itemWithInput: {
+        backgroundColor: '#FFF',
+        borderColor: '#CECECE',
+        height: 30,
+        marginBottom: 15,
+    },
+
+    formCard: {
+        marginBottom: 10,
+        marginLeft: 15,
+        marginRight: 15,
+        borderRadius: 12,
+        paddingTop: 5,
+        paddingBottom: 5,
+        elevation: 4,
+        paddingLeft: 20,
+        paddingRight: 20,
+    },
+
     card: {
         marginTop: 0,
         marginBottom: 2,

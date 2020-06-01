@@ -12,7 +12,7 @@ const call = async (modelName, serviceName, paramObject) => {
         credentials: 'include',
         headers: {
           'Authorization': Session.AuthToken,
-          'Access-Control-Allow-Origin' : '*',
+          'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
           'Content-Type': 'application/json'
         },
@@ -59,7 +59,33 @@ const pwdLogin = async (email, password) => {
   });
 }
 
+const getAddress = async (cep) => {
+  try {
+    resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    if (resp.status == 200) {
+      let rc = await resp.json();
+      console.log('RC', rc)
+      if (!rc.erro) {
+        return `${rc.logradouro}, ${rc.bairro}, ${rc.localidade}, ${rc.uf}`
+      } else {
+        return null
+      }
+    } else {
+      return null;
+    }
+  } catch (er) {
+    console.log('ERRROR GET ADDRESS', er);
+    return;
+  }
+}
+
 export default {
   call,
-  pwdLogin
+  pwdLogin,
+  getAddress
 }
