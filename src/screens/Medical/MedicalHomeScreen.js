@@ -1,16 +1,52 @@
 import React, { useState, useEffect } from "react";
-import { Container, Content, Form, Item, Input, Button, Spinner, Card } from 'native-base';
-import { Image, Text, View, BackHandler } from 'react-native';
+import styles from '../../assets/styles/globalStyles';
+import { Container, Content, Form, Item, Text, Button, Spinner, Card, CardItem } from 'native-base';
+import { Image, FlatList, View, BackHandler } from 'react-native';
+import WaitingQueueService from '../../services/WaitingQueueService';
 
 
-function MedicalHome() {
-  const [type, setType] = useState(null);
+function MedicalHomeScreen() {
+  const [patients, setPatients] = useState([]);
+  const [isLoading, setLoading] = useState(false);
+
+
+  useEffect(async () => {
+    let resp = await WaitingQueueService.getAll();
+    if (resp.status == 200){
+      setPatients(resp.data);
+    }
+  }, []);
+
+  const choosePatient = (patient) => {
+    console.log('PACIENTE ESCOLHIDO', patient)
+  }
+
+  const renderItem = (item) => {
+    try {
+      return (
+        <View>
+          <Card style={styles.card}>
+            <CardItem style={styles.cardItem} button onPress={() => choosePatient(item)}>
+               <View style={styles.cardInfos}>
+                <Text style={styles.defaultText}> {item.patient_name} </Text>
+              </View>
+            </CardItem>
+          </Card>
+        </View>
+      )
+    } catch (er) {
+      console.log('EROO 111', er)
+    }
+  }
+
   return (
-    <View>
-      <Text>
-        MedicalHomeScreen
-      </Text>
-    </View>
+    <FlatList
+      data={patients}
+      renderItem={({ item }) => renderItem(item)}
+      keyExtractor={item => { item.key }}
+      onEndReached={() => console.log('OPA?')}
+    />
+
   )
 }
-export default MedicalHome;
+export default MedicalHomeScreen;

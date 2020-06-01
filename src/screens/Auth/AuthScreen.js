@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { Component, useState, useEffect } from "react";
 import MedicalService from "../../services/MedicalService";
-import { Container, Content, Form, Item, Input, Button, Spinner, Card } from 'native-base';
-import { Image, Text, View, BackHandler } from 'react-native';
-import SocketIOClient from 'socket.io-client';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat';
-import PatientRegisterValidator from '../../validators/PatientRegisterValidator';
-import AutoMessages from '../../components/AutoMessages';
-
-const ENDPOINT = "http://192.168.80.3:3000";
+import { View, Image, TouchableOpacity } from 'react-native';
+import { Text, Container, Content, Item, Input, Button, Spinner } from 'native-base';
+import styles from '../../assets/styles/globalStyles';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import AuthService from '../../services/AuthService';
+import NavService from '../../services/NavService';
+import Toast from 'react-native-simple-toast';
 
 function AuthScreen() {
-  const [socket, initSocket] = useState(null);
+  const [type, setType] = useState(1);
   const [messages, setMessage] = useState([]);
   const [medicalOption, setMedicalOption] = useState(null);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [pwd, setPwd] = useState('');
+  const [email, setEmail] = useState('lala@gmail.com');
+  const [pwd, setPwd] = useState('111111');
   const [crm, setCRM] = useState('');
   const [cpf, setCPF] = useState('');
   const [cep, setCEP] = useState('');
@@ -23,160 +22,108 @@ function AuthScreen() {
   const [msgType, setMsgType] = useState(900);
 
 
-  useEffect(() => {
-    let socket = SocketIOClient(ENDPOINT);
-    initSocket(socket);
-    console.log('Emitido EVENTO')
-    socket.emit('hello_patient', 'RN TEST');
-  }, []);
-
-  useEffect(() => {
-    if (socket) {
-      socket.on('unavailable_server', function (message) {
-        alert('Tratar Unavaiable Servewr')
-        console.log('TRATAR unavailable_server', message)
-      });
-    }
-  });
-
-  useEffect(() => {
-    if (socket) {
-      socket.on('waiting_queue', function (message) {
-        setMessage(GiftedChat.append(messages, message));
-        setMsgType(null);
-      });
-    }
-  });
-
-  useEffect(() => {
-    if (socket) {
-      socket.on('fill_email', function (message) {
-        setMessage(GiftedChat.append(messages, message));
-        setMsgType(1);
-      });
-    }
-  });
-
-  useEffect(() => {
-    if (socket) {
-      socket.on('fill_name', function (message) {
-        setMessage(GiftedChat.append(messages, message));
-        setMsgType(2);
-      });
-    }
-  });
-
-  useEffect(() => {
-    if (socket) {
-      socket.on('receive_private_message', function (message) {
-        console.log('receive private msg', message);
-        setMessage(GiftedChat.append(messages, message));
-      });
-    }
-  });
-
-  const handleEmail = (msg) => {
-    try {
-      let prm = msg[0].text
-      let valid = PatientRegisterValidator.validateEmail(prm);
-      if (valid) {
-        setMessage(GiftedChat.append(messages, msg));
-        setEmail(prm)
-        socket.emit('patient_email', prm);
-        setMsgType(0)
-      } else {
-        setMessage(GiftedChat.append(messages, [...AutoMessages.fillEmailCorrect(), ...msg]));
-      }
-    } catch (er) {
-      console.log('ERRO - handleEmail:', er);
-    }
-
+ async function signIn() {
+   try{
+     let resp = await AuthService.medicalLogin(email, pwd);
+     console.log('Resp Login', resp);
+     if(resp.status == 200)
+       NavService.navigate('MedicalNav')
+     else
+      console.log('ERRO - AuthScreen', er);
+   }catch(er){
+      Toast.show('Login inválido.', Toast.LONG);
+      console.log('ERRO - AuthScreen', er);
+   }
   }
 
-  const handleName = (msg) => {
-    try {
-      let prm = msg[0].text
-      let valid = PatientRegisterValidator.validateName(prm);
-      if (valid) {
-        setName(prm);
-        setMessage(GiftedChat.append(messages, [...AutoMessages.fillCpf(), ...msg]));
-        setMsgType(3)
-      } else {
-        setMessage(GiftedChat.append(messages, [...AutoMessages.fillNameCorrect(), ...msg]));
-      }
-    } catch (er) {
-      console.log('ERRO - handleName:', er);
-    }
-
-  }
-
-  const handleCpf = (msg) => {
-    let prm = msg[0].text
-    let valid = PatientRegisterValidator.validateCpf(prm);
-    if (valid) {
-      setCPF(prm)
-      setMessage(GiftedChat.append(messages, [...AutoMessages.fillCep(), ...msg]));
-      setMsgType(4)
+  const renderMedicalLogin = () => {
+    if (type === 1) {
+      return (
+        <View>
+          <View style={{ alignItems: 'center', marginTop: 20 }}>
+            <Text style={{ fontSize: 14, color: '#B3B3B3' }}>Para realizar consultas, efetue o login abaixo.</Text>
+          </View>
+          <View style={{ marginTop: 20, marginBottom: 5 }}>
+            <View style={styles.containerBtnForm}>
+              <Button style={styles.btnLargeBlue} onPress={() => setType(2)}>
+                <Text style={{ color: '#FFF' }}> LOGIN MÉDICO </Text>
+              </Button>
+            </View>
+          </View>
+          <View style={{ alignContent: 'center', alignSelf: 'center' }}>
+            <TouchableOpacity onPress={() => NavService.navigate('MedicalSignUp')}>
+              <View style={{ flexDirection: 'row', marginTop: 20 }}>
+                <Text style={{ fontSize: 14, color: '#B3B3B3' }}>É médico e ainda não possui conta?</Text>
+                <Text style={{ fontSize: 14, color: '#808080', fontWeight: 'bold' }}> Cadastre-se? </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )
     } else {
-      setMessage(GiftedChat.append(messages, [...AutoMessages.fillCpfCorrect(), ...msg]));
+      return (
+        <View style={{ marginTop: 20, marginBottom: 5 }}>
+          <Item rounded inlineLabel style={styles.largeItemInput}>
+            <Input placeholderTextColor="#B3B3B3"
+              keyboardType="email-address"
+              autoCorrect={false}
+              autoCapitalize="none"
+              onChangeText={(email) => setEmail(email)}
+              value={email}
+              placeholder='E-mail'
+              style={styles.largeInputText} />
+          </Item>
+          <Item rounded inlineLabel style={styles.largeItemInput}>
+            <Input placeholderTextColor="#B3B3B3"
+              onChangeText={(password) => setPwd(password)}
+              value={pwd}
+              secureTextEntry={true}
+              placeholder='Senha'
+              style={styles.largeInputText} />
+          </Item>
+          <View style={styles.containerBtnForm}>
+            <Button style={[styles.btnLargeBlue, {marginBottom: 10}]} onPress={() => signIn()}>
+              <Text style={{ color: '#FFF' }}> ENTRAR </Text>
+            </Button>
+            <Button style={styles.btnLargeBlue} onPress={() => setType(1)}>
+              <Text style={{ color: '#FFF' }}> CANCELAR </Text>
+            </Button>
+          </View>
+        </View>
+      )
     }
   }
-
-  const handleCep = (msg) => {
-    let prm = msg[0].text
-    let valid = PatientRegisterValidator.validateCep(prm);
-    if (valid) {
-      setCEP(prm)
-      socket.emit('create_patient', { email, name, cpf, cep: prm });
-      setMsgType(null)
-    } else {
-      setMessage(GiftedChat.append(messages, [...AutoMessages.fillCepCorrect(), ...msg]));
-    }
-  }
-
-  const handleSendMessage = async (message) => {
-    try {
-      switch (msgType) {
-        case 1:
-          return handleEmail(message)
-        case 2:
-          return handleName(message)
-        case 3:
-          return handleCpf(message)
-        case 4:
-          return handleCep(message)
-        default:
-          setMessage(GiftedChat.append(messages, message));
-          socket.emit('send_private_message', message);
-      }
-    } catch (er) {
-      console.log('ERRO SEND MSG', er)
-    }
-  }
-
-  const MedicalOptions = () => {
-    return (
-      <View>
-        <Button block onPress={() => sendMessage()}>
-          <Text >Cadastro</Text>
-        </Button>
-        <Button block onPress={() => setMedicalOption(2)}>
-          <Text >Login</Text>
-        </Button>
-      </View>
-    );
-  }
-
 
   return (
-    <GiftedChat
-      messages={messages}
-      onSend={newMessage => handleSendMessage(newMessage)}
-      user={{ _id: 20, name: 'User Test' }}
-    />
+    <Container style={{ backgroundColor: '#FFF' }}>
+      <Content style={styles.defaultContentContainer}>
+        <View style={{ alignItems: 'center', marginTop: 20 }}>
+          <View style={{ flexDirection: 'column', marginTop: 20 }}>
+            <Text style={{ fontSize: 14, color: '#B3B3B3' }}>BEM VINDO!</Text>
+          </View>
+          <View style={{ flexDirection: 'column', marginTop: 20 }}>
+            <Text style={{ fontSize: 14, color: '#B3B3B3' }}>Para ser atendido, clique no botão abaixo!</Text>
+          </View>
+        </View>
+        <View style={{ marginTop: 20, marginBottom: 5 }}>
+          <View style={styles.containerBtnForm}>
+            <Button style={styles.btnLargeBlue} onPress={() => signIn()}>
+              <Text style={{ color: '#FFF' }}> SOU PACIENTE </Text>
+            </Button>
+          </View>
+        </View>
+        <View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginTop: 60, marginBottom: 5 }}>
+            <View style={[styles.hr, { minWidth: 100, paddingLeft: 100 }]}></View>
+            <Text style={{ fontSize: 14, top: -5 }}>ou</Text>
+            <View style={[styles.hr, { minWidth: 100, paddingRight: 100 }]}></View>
+          </View>
+          {renderMedicalLogin()}
+        </View>
+      </Content>
+    </Container>
   )
 }
-
 export default AuthScreen;
 
   // async function signUp(event) {

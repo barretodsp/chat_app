@@ -1,3 +1,5 @@
+import { Session } from '../session/Session';
+
 const call = async (modelName, serviceName, paramObject) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -7,11 +9,12 @@ const call = async (modelName, serviceName, paramObject) => {
       console.log('CHEGUEI em REST-call');
       resp = await fetch(`http://192.168.80.3:3000/api/v1/${modelName}/${serviceName}`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
+          'Authorization': Session.AuthToken,
           'Access-Control-Allow-Origin' : '*',
           'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
           'Content-Type': 'application/json'
-          // 'Authorization': Session.AuthToken
         },
         body: JSON.stringify(paramObject)
       })
@@ -34,7 +37,6 @@ const pwdLogin = async (email, password) => {
       let status = null;
       let paramObject = {}
       paramObject = { email, password }
-      // resp = await fetch(`https://servicesapi.medilist.com.br:3000/api/v1/auth/login`, {
       resp = await fetch(`http://192.168.1.106:3000/api/v1/auth/loginMedical`, {
         method: 'POST',
         headers: {
