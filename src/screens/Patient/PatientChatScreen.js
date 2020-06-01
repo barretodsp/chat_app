@@ -22,6 +22,7 @@ function PatientChatScreen() {
   const [pwd, setPwd] = useState('');
   const [crm, setCRM] = useState('');
   const [cpf, setCPF] = useState('');
+  //incluir api
   const [cep, setCEP] = useState('');
   const [specialism, setSpecialism] = useState('');
   const [msgType, setMsgType] = useState(900);
@@ -45,6 +46,17 @@ function PatientChatScreen() {
         setMed(received.medical_id);
         setMedSocket(received.medical_socket);
         setChatTitle(received.medical_name)
+      });
+    }
+  });
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('medical_exit', function (message) {
+        alert(message[0].text);
+        setCID(null);
+        setMed(null);
+        setMedSocket(null);
       });
     }
   });
@@ -169,7 +181,7 @@ function PatientChatScreen() {
           return handleCep(message)
         default:
           setMessage(GiftedChat.append(messages, message));
-           socket.emit('send_consultation_message', medSocketId, medId, CID, message);
+          socket.emit('send_consultation_message', medSocketId, medId, CID, message);
       }
     } catch (er) {
       console.log('ERRO SEND MSG', er)
@@ -192,7 +204,7 @@ function PatientChatScreen() {
 
   return (
     <Container>
-      <ChatHeader title={chatTitle}/>
+      <ChatHeader title={chatTitle} />
       <GiftedChat
         messages={messages}
         onSend={newMessage => handleSendMessage(newMessage)}

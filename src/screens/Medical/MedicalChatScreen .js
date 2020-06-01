@@ -10,14 +10,12 @@ const ENDPOINT = "http://192.168.80.3:3000";
 
 
 function MedicalLogoutScreen(props) {
-  const [type, setType] = useState(null);
   const [chatTitle, setChatTitle] = useState('Iniciando consulta...');
   const [socket, initSocket] = useState(null);
   const [messages, setMessage] = useState([]);
   const [CID, setCID] = useState(null);
   const [patId, setPatId] = useState(null);
   const [patSocketId, setPatSocket] = useState(null);
-  const [patName, setPatName] = useState(null);
 
   useEffect(() => {
     console.log('MEDICAL CHAT - PROPS', props.navigation.state.params);
@@ -45,6 +43,18 @@ function MedicalLogoutScreen(props) {
 
   useEffect(() => {
     if (socket) {
+      socket.on('patient_exit', function (message) {
+        alert(message[0].text);
+        setCID(null);
+        setPatId(null);
+        setPatSocket(null);
+      });
+    }
+  });
+
+
+  useEffect(() => {
+    if (socket) {
       socket.on('unavailable_server', function (message) {
         alert('Tratar Unavaiable Servewr')
         console.log('TRATAR unavailable_server', message)
@@ -63,6 +73,7 @@ function MedicalLogoutScreen(props) {
 
   const handleSendMessage = async (message) => {
     try {
+      setMessage(GiftedChat.append(messages, message));
       socket.emit('send_consultation_message', patSocketId, patId, CID, message);
     } catch (er) {
       console.log('ERRO SEND MSG', er)
