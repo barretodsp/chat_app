@@ -107,7 +107,7 @@ function AuthScreen() {
         </View>
         <View style={{ marginTop: 20, marginBottom: 5 }}>
           <View style={styles.containerBtnForm}>
-            <Button style={styles.btnLargeBlue} onPress={() => signIn()}>
+            <Button style={styles.btnLargeBlue} onPress={() => NavService.navigate('PatientChatScreen')}>
               <Text style={{ color: '#FFF' }}> SOU PACIENTE </Text>
             </Button>
           </View>

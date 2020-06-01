@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Container, Content, Form, Item, Input, Button, Spinner, Card } from 'native-base';
 import { Image, Text, View, BackHandler } from 'react-native';
-
-
 import SocketIOClient from 'socket.io-client';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import PatientRegisterValidator from '../../validators/PatientRegisterValidator';
 import AutoMessages from '../../components/AutoMessages';
+import ChatHeader from '../../components/Headers/ChatHeader';
 
 const ENDPOINT = "http://192.168.80.3:3000";
 
@@ -16,6 +15,7 @@ function PatientChatScreen() {
   const [socket, initSocket] = useState(null);
   const [messages, setMessage] = useState([]);
   const [medicalOption, setMedicalOption] = useState(null);
+  const [chatTitle, setChatTitle] = useState('Bem-Vindo!');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [pwd, setPwd] = useState('');
@@ -46,6 +46,7 @@ function PatientChatScreen() {
     if (socket) {
       socket.on('waiting_queue', function (message) {
         setMessage(GiftedChat.append(messages, message));
+        setChatTitle('Aguardando Atendimento.')
         setMsgType(null);
       });
     }
@@ -172,11 +173,15 @@ function PatientChatScreen() {
 
 
   return (
-    <GiftedChat
-      messages={messages}
-      onSend={newMessage => handleSendMessage(newMessage)}
-      user={{ _id: 20, name: 'User Test' }}
-    />
+    <Container>
+      <ChatHeader title={chatTitle}/>
+      <GiftedChat
+        messages={messages}
+        onSend={newMessage => handleSendMessage(newMessage)}
+        user={{ _id: 20, name: 'User Test' }}
+      />
+    </Container>
+
   )
 }
 export default PatientChatScreen;

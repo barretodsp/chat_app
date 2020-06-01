@@ -6,6 +6,7 @@ const PatientNav = createStackNavigator({
     PatientChatScreen: { screen: PatientChatScreen }
 }, {
     initialRouteName: 'PatientChatScreen',
+    headerMode: 'none'
 });
 
 export default PatientNav;

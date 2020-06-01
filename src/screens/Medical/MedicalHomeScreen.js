@@ -3,6 +3,7 @@ import styles from '../../assets/styles/globalStyles';
 import { Container, Content, Form, Item, Text, Button, Spinner, Card, CardItem } from 'native-base';
 import { Image, FlatList, View, BackHandler } from 'react-native';
 import WaitingQueueService from '../../services/WaitingQueueService';
+import NavService from '../../services/NavService';
 
 
 function MedicalHomeScreen() {
@@ -18,7 +19,8 @@ function MedicalHomeScreen() {
   }, []);
 
   const choosePatient = (patient) => {
-    console.log('PACIENTE ESCOLHIDO', patient)
+    console.log('PACIENTE ESCOLHIDO', patient);
+    NavService.navigate('MedicalChatScreen', {patient})
   }
 
   const renderItem = (item) => {

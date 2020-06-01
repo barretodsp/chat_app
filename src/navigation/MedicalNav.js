@@ -3,15 +3,18 @@ import { Image } from 'react-native';
 import MedicalHomeScreen from '../screens/Medical/MedicalHomeScreen';
 import MedicalUpdateScreen from '../screens/Medical/MedicalUpdateScreen';
 import MedicalLogoutScreen from '../screens/Medical/MedicalLogoutScreen';
+import MedicalChatScreen from '../screens/Medical/MedicalChatScreen ';
 
+import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
-// import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-// const MainNav = createStackNavigator({
-//     MedicalHomeScreen: { screen: MedicalHomeScreen }
-// }, {
-//     initialRouteName: 'MedicalHomeScreen',
-// });
+const MainNav = createStackNavigator({
+  MedicalHomeScreen: { screen: MedicalHomeScreen },
+  MedicalChatScreen: { screen: MedicalChatScreen }
+}, {
+  initialRouteName: 'MedicalHomeScreen',
+  headerMode: 'none'
+});
 
 
 const MedicalNav = createBottomTabNavigator({
@@ -25,7 +28,7 @@ const MedicalNav = createBottomTabNavigator({
     }
   },
   Home: {
-    screen: MedicalHomeScreen,
+    screen: MainNav,
     navigationOptions: {
       tabBarLabel: 'Home',
       tabBarIcon: ({ tintColor }) => (
@@ -45,7 +48,7 @@ const MedicalNav = createBottomTabNavigator({
 }, {
   initialRouteName: 'Home',
   lazy: true,
-  tabBarOptions:{
+  tabBarOptions: {
     activeTintColor: '#1EB5C1',
   }
 });

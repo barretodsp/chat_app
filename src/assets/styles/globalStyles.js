@@ -10,7 +10,7 @@ const global = StyleSheet.create({
         borderRadius: 0,
         paddingVertical: 5,
     },
-    
+
     cardItem: {
         paddingRight: 1,
     },
@@ -18,6 +18,33 @@ const global = StyleSheet.create({
     cardInfos: {
         width: 170,
         flexDirection: 'column'
+    },
+
+    header: {
+        height: 60,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        elevation: 4,
+        position: 'relative',
+        backgroundColor: '#0A4067',
+    },
+
+    backIcon: {
+        color: '#FFFFFF'
+    },
+
+    simpleHeaderRow: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+
+    simpleHeaderTitle: {
+        fontSize: 18,
+        fontFamily: 'Roboto',
+        color: '#FFFFFF',
+        paddingHorizontal: 40
     },
 
     defaultText: {
