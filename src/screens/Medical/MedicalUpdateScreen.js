@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Container, Content, Form, Item, Input, Button, Spinner, Card } from 'native-base';
 import { Image, Text, View } from 'react-native';
+import { NavigationActions } from 'react-navigation';
 import styles from '../../assets/styles/globalStyles';
 import RestService from '../../services/RestService';
 import MedicalService from '../../services/MedicalService';
 import SimpleHeader from '../../components/Headers/SimpleHeader ';
 import NavService from "../../services/NavService";
 import { Session } from "../../session/Session";
+import Toast from 'react-native-simple-toast';
+
 
 
 function MedicalUpdateScreen() {
@@ -19,14 +22,15 @@ function MedicalUpdateScreen() {
   const [CEP, setCEP] = useState(null);
   const [address, setAddress] = useState(null);
   const [specialism, setSpecialism] = useState(null);
-  const [PWD, setPWD] = useState(null);
+  const [PWD, setPWD] = useState('1111111');
 
 
   async function save() {
     try {
-      let resp = await MedicalService.create(name, email, CPF, CEP, address, CRM, specialism, PWD);
+      let resp = await MedicalService.update(name, email, CPF, CEP, address, CRM, specialism, PWD);
       if (resp.success) {
-        console.warn('success')
+        Toast.show('Cadastro modificado com sucesso!', Toast.LONG);
+        NavService.navigate('Home');
       } else {
         alert(resp.error)
       }
@@ -39,9 +43,15 @@ function MedicalUpdateScreen() {
   useEffect(async () => {
     try {
       let resp = await MedicalService.get(Session.CurrentUser.medical_id)
-      console.log('RESP UPDATE', resp)
-      if (resp.status == 200) {
-        alert('OK!')
+      if (resp.status == 200 && resp.medical) {
+        let medical = resp.medical;
+        setName(medical.name)
+        setEmail(medical.email)
+        handleCep(medical.cep)
+        handleCpf(medical.cpf)
+        setSpecialism(medical.specialism)
+        setCRM(medical.crm)
+        setAddress(medical.address)
       }
     } catch (e) {
       alert(e.error)
@@ -53,7 +63,7 @@ function MedicalUpdateScreen() {
     return (
       <Container>
         <Button block style={styles.btnLargeBlue} onPress={() => save()}>
-          <Text style={styles.blueBtnLabel}> Cadastrar </Text>
+          <Text style={styles.blueBtnLabel}> Salvar </Text>
         </Button>
         <Button block style={[styles.btnLargeBlue, { marginTop: 10 }]} onPress={() => NavService.goBack()}>
           <Text style={styles.blueBtnLabel}> Voltar </Text>
@@ -123,16 +133,6 @@ function MedicalUpdateScreen() {
               placeholderTextColor="#CECECE"
               onChangeText={(email) => setEmail(email)}
               value={email} />
-          </Item>
-
-          <Text style={styles.inputTextLabel} > Senha </Text>
-          <Item rounded style={styles.itemWithInput}>
-            <Input style={styles.formTextInput}
-              maxLength={50}
-              secureTextEntry={true}
-              placeholderTextColor="#CECECE"
-              onChangeText={(pwd) => setPWD(pwd)}
-              value={PWD} />
           </Item>
 
           <Text style={styles.inputTextLabel} > CPF </Text>

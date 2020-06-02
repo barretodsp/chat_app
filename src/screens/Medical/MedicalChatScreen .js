@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Container, Content, Form, Item, Input, Button, Spinner, Card } from 'native-base';
-import { Image, Text, View, BackHandler } from 'react-native';
+import { Alert, Image, Text, View, BackHandler } from 'react-native';
 import SocketIOClient from 'socket.io-client';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import { Session } from '../../session/Session';
-import AutoMessages from '../../components/AutoMessages';
 import ChatHeader from '../../components/Headers/ChatHeader';
+import NavService from '../../services/NavService';
 const ENDPOINT = "http://192.168.80.3:3000";
 
 
@@ -30,6 +30,24 @@ function MedicalLogoutScreen(props) {
   }, []);
 
   useEffect(() => {
+    BackHandler.addEventListener('backPress', () => {
+      Alert.alert(
+        'Tem certeza de que deseja sair?',
+        'Esta ação suspenderá o atendimento.',
+        [
+          { text: 'Cancelar', onPress: () => console.log('exit') },
+          { text: 'SAIR', onPress: () => exitChat() },
+        ],
+        { cancelable: false }
+      )
+    });
+    // Clean BackHandler Observer
+    return function cleanup() {
+      BackHandler.removeEventListener('backPress');
+    };
+  });
+
+  useEffect(() => {
     if (socket) {
       socket.on('consultation_started', function (received) {
         setMessage(GiftedChat.append(messages, received.message));
@@ -48,6 +66,8 @@ function MedicalLogoutScreen(props) {
         setCID(null);
         setPatId(null);
         setPatSocket(null);
+        socket.disconnect();
+        NavService.navigate('MedicalHomeScreen');
       });
     }
   });
@@ -71,6 +91,8 @@ function MedicalLogoutScreen(props) {
     }
   });
 
+
+
   const handleSendMessage = async (message) => {
     try {
       setMessage(GiftedChat.append(messages, message));
@@ -80,9 +102,20 @@ function MedicalLogoutScreen(props) {
     }
   }
 
+  const exitChat = () => {
+    try {
+      socket.disconnect();
+      NavService.navigate('MedicalHomeScreen');
+    } catch (er) {
+      NavService.navigate('MedicalHomeScreen');
+    }
+  }
+
+
+
   return (
     <Container>
-      <ChatHeader title={chatTitle} />
+      <ChatHeader exit={exitChat.bind(this)} title={chatTitle} />
       <GiftedChat
         messages={messages}
         onSend={newMessage => handleSendMessage(newMessage)}

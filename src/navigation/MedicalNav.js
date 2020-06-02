@@ -10,7 +10,7 @@ import { createBottomTabNavigator } from 'react-navigation-tabs';
 
 const MainNav = createStackNavigator({
   MedicalHomeScreen: { screen: MedicalHomeScreen },
-  MedicalChatScreen: { screen: MedicalChatScreen }
+  MedicalChatScreen: { screen: MedicalChatScreen },
 }, {
   initialRouteName: 'MedicalHomeScreen',
   headerMode: 'none'

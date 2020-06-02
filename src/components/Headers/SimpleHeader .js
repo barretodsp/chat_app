@@ -5,10 +5,9 @@ import { Button, Icon } from "native-base";
 import NavService from '../../services/NavService';
 import { NavigationActions } from 'react-navigation';
 
-function ChatHeader(props) {
+function SimpleHeader(props) {
   const { header, simpleHeaderRow, simpleHeaderTitle, backIcon } = styles;
   const [title, setTitle] = useState('');
-  console.log('PROPS em HEADER', props)
 
   useEffect(() => {
     setTitle(props.title)
@@ -29,4 +28,4 @@ function ChatHeader(props) {
   )
 }
 
-export default ChatHeader;
+export default SimpleHeader;

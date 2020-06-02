@@ -1,5 +1,6 @@
 import RestService from './RestService';
 import Validator from '../validators/MedicalValidator';
+import { Session } from '../session/Session';
 
 
 const create = (name, email, cpf, cep, address, crm, specialism, password) => {
@@ -25,6 +26,28 @@ const create = (name, email, cpf, cep, address, crm, specialism, password) => {
 };
 
 
+const update = (name, email, cpf, cep, address, crm, specialism, password) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let resp = null;
+      let valid = null
+      valid = await Validator.setValidate({ name, email, cpf, cep, address, crm, specialism, password });
+      if (valid.error)
+        return resolve(valid)
+
+      resp = await RestService.call('medical', 'update', {
+        medical_id: Session.CurrentUser.medical_id, name, email, crm, cpf, cep, specialism, address
+      })
+      if (resp.status == 200)
+        return resolve({ success: true })
+      else
+        return reject({ error: 'Houve um erro ao realizar essa operação.' })
+    } catch (er) {
+      return reject({ error: 'Houve um erro ao realizar essa operação.' })
+    }
+  });
+};
+
 const get = (medical_id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -39,5 +62,6 @@ const get = (medical_id) => {
 
 export default {
   create,
-  get
+  get,
+  update
 }

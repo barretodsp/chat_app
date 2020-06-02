@@ -6,6 +6,7 @@ import RestService from '../../services/RestService';
 import MedicalService from '../../services/MedicalService';
 import SimpleHeader from '../../components/Headers/SimpleHeader ';
 import NavService from "../../services/NavService";
+import Toast from 'react-native-simple-toast';
 
 
 function MedicalSignUpScreen() {
@@ -26,7 +27,8 @@ function MedicalSignUpScreen() {
     try {
       let resp = await MedicalService.create(name, email, CPF, CEP, address, CRM, specialism, PWD);
       if (resp.success) {
-        console.warn('success')
+        Toast.show('Cadastro concluído com sucesso!', Toast.LONG);
+        NavService.goBack();
       } else {
         alert(resp.error)
       }
@@ -42,7 +44,7 @@ function MedicalSignUpScreen() {
         <Button block style={styles.btnLargeBlue} onPress={() => save()}>
           <Text style={styles.blueBtnLabel}> Cadastrar </Text>
         </Button>
-        <Button block style={[styles.btnLargeBlue, { marginTop: 10}]} onPress={() => NavService.goBack()}>
+        <Button block style={[styles.btnLargeBlue, { marginTop: 10 }]} onPress={() => NavService.goBack()}>
           <Text style={styles.blueBtnLabel}> Voltar </Text>
         </Button>
       </Container>

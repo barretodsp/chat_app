@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Container, Content, Form, Item, Input, Button, Spinner, Card } from 'native-base';
-import { Image, Text, View, BackHandler } from 'react-native';
+import { Container, Button } from 'native-base';
+import { Alert, Text, View, BackHandler } from 'react-native';
 import SocketIOClient from 'socket.io-client';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import PatientRegisterValidator from '../../validators/PatientRegisterValidator';
 import AutoMessages from '../../components/AutoMessages';
 import ChatHeader from '../../components/Headers/ChatHeader';
 import { Session } from '../../session/Session';
+import RestService from '../../services/RestService';
+import NavService from "../../services/NavService";
 
 const ENDPOINT = "http://192.168.80.3:3000";
 
@@ -34,7 +36,6 @@ function PatientChatScreen() {
   useEffect(() => {
     let socket = SocketIOClient(ENDPOINT);
     initSocket(socket);
-    console.log('Emitido EVENTO')
     socket.emit('hello_patient', 'RN TEST');
   }, []);
 
@@ -57,6 +58,8 @@ function PatientChatScreen() {
         setCID(null);
         setMed(null);
         setMedSocket(null);
+        socket.disconnect();
+        NavService.navigate('AuthScreen');
       });
     }
   });
@@ -75,7 +78,7 @@ function PatientChatScreen() {
       socket.on('waiting_queue', function (receive) {
         console.log('RECEIVE waitin queue', receive)
         setMessage(GiftedChat.append(messages, receive.message));
-        Session.setCurrentUser(receive.patient);
+        Session.setCurrentUser(receive.patient)
         setChatTitle('Aguardando Atendimento.')
         setMsgType(null);
       });
@@ -108,6 +111,33 @@ function PatientChatScreen() {
       });
     }
   });
+
+  useEffect(() => {
+    BackHandler.addEventListener('backPress', () => {
+      Alert.alert(
+        'Tem certeza de que deseja sair?',
+        'Esta ação suspenderá o atendimento.',
+        [
+          { text: 'Cancelar', onPress: () => console.log('exit') },
+          { text: 'SAIR', onPress: () => exitChat() },
+        ],
+        { cancelable: false }
+      )
+    });
+    // Clean BackHandler Observer
+    return function cleanup() {
+      BackHandler.removeEventListener('backPress');
+    };
+  });
+
+  const exitChat = () => {
+    try {
+      socket.disconnect();
+      NavService.navigate('AuthScreen');
+    } catch (er) {
+      NavService.navigate('AuthScreen');
+    }
+  }
 
   const handleEmail = (msg) => {
     try {
@@ -156,12 +186,13 @@ function PatientChatScreen() {
     }
   }
 
-  const handleCep = (msg) => {
+  const handleCep = async (msg) => {
     let prm = msg[0].text
     let valid = PatientRegisterValidator.validateCep(prm);
-    if (valid) {
+    let address = await RestService.getAddress(prm)
+    if (valid && address) {
       setCEP(prm)
-      socket.emit('create_patient', { email, name, cpf, cep: prm });
+      socket.emit('create_patient', { email, name, cpf, cep: prm, address });
       setMsgType(null)
     } else {
       setMessage(GiftedChat.append(messages, [...AutoMessages.fillCepCorrect(), ...msg]));
@@ -204,7 +235,7 @@ function PatientChatScreen() {
 
   return (
     <Container>
-      <ChatHeader title={chatTitle} />
+      <ChatHeader exit={exitChat.bind(this)} title={chatTitle} />
       <GiftedChat
         messages={messages}
         onSend={newMessage => handleSendMessage(newMessage)}
